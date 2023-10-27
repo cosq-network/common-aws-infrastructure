@@ -5,7 +5,7 @@ on:
       artifact_name:
         description: 'Artifact name'
         required: true
-        default: 'psycopg2-binary-layer'
+        default: 'cosq-python-layer'
 
 jobs:
   install:
