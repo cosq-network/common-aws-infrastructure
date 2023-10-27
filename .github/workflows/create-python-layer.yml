@@ -45,6 +45,7 @@ jobs:
     needs: build-layer
     uses: cosq-network/common-workflows/.github/workflows/deploy-layer.yml@main
     with:
+      artifact_name: ${{ inputs.artifact_name }}
       archive: ${{ inputs.artifact_name }}.zip
       layer_name: ${{ inputs.artifact_name }}
       S3Key: ${{ inputs.artifact_name }}.zip
