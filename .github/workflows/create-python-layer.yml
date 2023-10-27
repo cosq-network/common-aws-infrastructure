@@ -10,6 +10,11 @@ on:
         description: 'S3 Bucket'
         required: true
         default: 'cosq-layers-dev'
+      env_name:
+        description: 'Name of the environment'
+        required: false
+        type: string
+        default: 'dev'
 
 jobs:
   build-layer:
@@ -32,23 +37,23 @@ jobs:
 
       - name: Create Archive
         run: |
-          cd ${{ inputs.artifact_name }}
-          zip -r ../${{ inputs.artifact_name }}.zip .
+          cd ${{ inputs.artifact_name }}-${{ inputs.env_name }}
+          zip -r ../${{ inputs.artifact_name }}-${{ inputs.env_name }}.zip .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ inputs.artifact_name }}
-          path: ${{ inputs.artifact_name }}.zip
+          name: ${{ inputs.artifact_name }}-${{ inputs.env_name }}
+          path: ${{ inputs.artifact_name }}-${{ inputs.env_name }}.zip
 
   deploy-layer:
     needs: build-layer
     uses: cosq-network/common-workflows/.github/workflows/deploy-layer.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
-      archive: ${{ inputs.artifact_name }}.zip
+      archive: ${{ inputs.artifact_name }}-${{ inputs.env_name }}.zip
       layer_name: ${{ inputs.artifact_name }}
-      S3Key: ${{ inputs.artifact_name }}.zip
+      S3Key: ${{ inputs.artifact_name }}-${{ inputs.env_name }}.zip
       S3Bucket: ${{ inputs.s3_bucket }}
       AWS_DEFAULT_REGION: ${{ vars.AWS_REGION_DEV }}
     secrets:
