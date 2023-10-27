@@ -36,3 +36,12 @@ jobs:
         with:
           name: ${{ inputs.artifact_name }}
           path: ${{ inputs.artifact_name }}.zip
+
+  deploy-layer:
+    needs: build-layer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ inputs.artifact_name }}
