@@ -22,12 +22,17 @@ jobs:
 
       - name: Install psycopg2-binary
         run: |
-          mkdir -p layer/python/lib/python3.10/site-packages
-          pip install -t layer/python/lib/python3.10/site-packages psycopg2-binary
+          mkdir -p ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages
+          pip install -t ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages psycopg2-binary
         shell: bash
+
+      - name: Create Archive
+        run: |
+          cd ${{ inputs.artifact_name }}
+          zip -r ../${{ inputs.artifact_name }}.zip .
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: ${{ github.event.inputs.artifact_name }}
-          path: layer
+          path: ${{ inputs.artifact_name }}.zip
