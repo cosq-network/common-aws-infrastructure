@@ -31,8 +31,8 @@ jobs:
 
       - name: Install dependiencies
         run: |
-          mkdir -p ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages
-          pip install -t ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages psycopg2-binary
+          mkdir -p ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages
+          pip install -t ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages psycopg2-binary
         shell: bash
 
       - name: Create Archive
