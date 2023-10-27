@@ -6,6 +6,10 @@ on:
         description: 'Artifact name'
         required: true
         default: 'cosq-python-layer'
+      s3_bucket:
+        description: 'S3 Bucket'
+        required: true
+        default: 'cosq-layers-dev'
 
 jobs:
   build-layer:
@@ -39,9 +43,13 @@ jobs:
 
   deploy-layer:
     needs: build-layer
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ inputs.artifact_name }}
+    uses: cosq-network/common-workflows/.github/workflows/deploy-layer.yml@main
+    with:
+      archive: ${{ inputs.artifact_name }}.zip
+      layer_name: ${{ inputs.artifact_name }}
+      S3Key: ${{ inputs.artifact_name }}.zip
+      S3Bucket: ${{ inputs.s3_bucket }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_REGION_DEV }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
