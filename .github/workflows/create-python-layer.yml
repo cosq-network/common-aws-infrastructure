@@ -8,7 +8,7 @@ on:
         default: 'cosq-python-layer'
 
 jobs:
-  install:
+  build-layer:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install psycopg2-binary
+      - name: Install dependiencies
         run: |
           mkdir -p ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages
           pip install -t ${{ inputs.artifact_name }}/python/lib/python3.10/site-packages psycopg2-binary
@@ -34,5 +34,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ github.event.inputs.artifact_name }}
+          name: ${{ inputs.artifact_name }}
           path: ${{ inputs.artifact_name }}.zip
