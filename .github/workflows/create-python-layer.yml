@@ -1,4 +1,4 @@
-name: Create Python Layer
+name: Python Layer
 on:
   workflow_dispatch:
     inputs:
