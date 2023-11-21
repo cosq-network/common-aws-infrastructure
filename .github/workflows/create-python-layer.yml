@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages
           pip install -t ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages psycopg2-binary
-          pip install -t ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages requests
+          pip install -t ${{ inputs.artifact_name }}-${{ inputs.env_name }}/python/lib/python3.10/site-packages requests "urllib3<2"
         shell: bash
 
       - name: Create Archive
