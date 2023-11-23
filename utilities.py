@@ -51,10 +51,7 @@ def get_db_config(dbname_env='DBNAME'):
 def get_proxy_parameters(event):
     """Retrieve proxy parameters from API Gateway event"""
     path_parameters = event.get('pathParameters', {})
-    print ('pathParameters')
-    print (path_parameters)
     proxy = path_parameters.get('proxy', None)
-    print ('proxy')
     if proxy is not None:
         proxy_parameters = proxy.split('/')
         return proxy_parameters

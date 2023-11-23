@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Integrates a Lambda with a given ReST API, creating a proxy method
+
+Parameters:
+  RestApiId:
+    Type: String
+    Description: The ID of the REST API Gateway.
+  ParentResourceName:
+    Type: String
+    Description: The name of the parent on the REST API Gateway.
+  ParentResourceId:
+    Type: String
+    Description: The ID of the parent on the REST API Gateway.
+  LambdaFunctionName:
+    Type: String
+    Description: The name of the Lambda function to integrate with the REST API.
+  HTTPMethod:
+    Type: String
+    Description: The HTTP method to use for the integration.
+    Default: GET
+  ContentHandling:
+    Type: String
+    Description: The content handling method to use for the integration.
+    Default: CONVERT_TO_TEXT
+  StageName:
+    Type: String
+    Description: The name of the stage.
+    Default: 'dev'
+
+
+Resources:
+  LambdaProxyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApiId
+      ParentId: !Ref LambdaResource
+      PathPart: '{proxy+}'
+
+  LambdaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: !Ref HTTPMethod
+      AuthorizationType: NONE
+      ResourceId: LambdaProxyResource
+      RestApiId: !Ref RestApiId
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub  arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaFunctionName}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaFunctionName}
+      Principal: apigateway.amazonaws.com
+      SourceArn: !If
+        - !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/*/${ResourceName}/{proxy+}
+
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: LambdaMethod
+    Properties:
+      RestApiId: !Ref RestApiId
+      Description: !Sub Deployment for ${StageName}
+      StageName: !Ref StageName
+
+  MethodOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      ResourceId: !Ref LambdaProxyResource
+      RestApiId: !Ref RestApiId
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST,GET'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
